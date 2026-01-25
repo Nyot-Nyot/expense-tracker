@@ -1,0 +1,65 @@
+# Node modules
+/node_modules/
+
+# Build output
+/dist/
+/build/
+/lib/
+/out/
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+/coverage/
+/coverage.*
+/.nyc_output/
+
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+.env.test
+.env.production
+
+# Docker overrides / local secrets
+docker-compose.override.yml
+
+# Editor and OS metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+
+# Editor swap / backup files
+*~
+*.swp
+*.swo
+
+# Caches
+.cache/
+.parcel-cache/
+.eslintcache
+
+# Process manager
+.pm2/
+
+# Misc
+lib-cov/
