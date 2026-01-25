@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import express from "express";
 import connectDB from "./src/config/db.js";
 import AuthRoutes from "./src/routes/AuthRoutes.js";
+import ExpenseRoutes from "./src/routes/ExpenseRoutes.js";
 
 dotenv.config();
 
@@ -18,7 +19,9 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", AuthRoutes);
+app.use("/api/expenses", ExpenseRoutes);
 
+// Start Server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
