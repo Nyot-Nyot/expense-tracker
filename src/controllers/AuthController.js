@@ -7,12 +7,10 @@ class AuthController {
 
       // Basic input validation and whitelisting
       if (typeof email !== "string" || typeof password !== "string") {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Invalid registration data: email and password are required.",
-          });
+        return res.status(400).json({
+          message:
+            "Invalid registration data: email and password are required.",
+        });
       }
 
       const userData = { email, password };
@@ -31,6 +29,35 @@ class AuthController {
       // Validation errors
       else if (error.name === "ValidationError") {
         statusCode = 400;
+      }
+
+      res.status(statusCode).json({ message: error.message });
+    }
+  }
+
+  async login(req, res) {
+    try {
+      const { email, password } = req.body || {};
+
+      // Basic input validation and whitelisting
+      if (typeof email !== "string" || typeof password !== "string") {
+        return res.status(400).json({
+          message: "Invalid login data: email and password are required.",
+        });
+      }
+
+      const result = await AuthService.login(email, password);
+      res.status(200).json(result);
+    } catch (error) {
+      let statusCode = 500;
+
+      // Unauthorized: e.g., invalid email or password
+      if (
+        error &&
+        (error.code === "AUTH_INVALID_CREDENTIALS" ||
+          error.name === "AuthenticationError")
+      ) {
+        statusCode = 401;
       }
 
       res.status(statusCode).json({ message: error.message });
