@@ -33,9 +33,16 @@ class NotFoundError extends HttpError {
   }
 }
 
+class ForbiddenError extends HttpError {
+  constructor(message = "Forbidden", details) {
+    super(message, "FORBIDDEN", 403, details);
+  }
+}
+
 export {
   AuthenticationError,
   ConflictError,
+  ForbiddenError,
   HttpError,
   NotFoundError,
   ValidationError,

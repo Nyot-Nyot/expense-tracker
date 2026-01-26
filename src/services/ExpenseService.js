@@ -7,6 +7,10 @@ export default class ExpenseService {
     return await this.expenseRepository.createExpense(expenseData);
   }
 
+  async getExpenseById(expenseId) {
+    return await this.expenseRepository.getExpenseById(expenseId);
+  }
+
   async getExpensesByUser(userId, query = {}) {
     const { filter, from, to, page, limit } = query;
     let dateFilter = {};
@@ -40,22 +44,37 @@ export default class ExpenseService {
         let toDate;
 
         if (from) {
-          fromDate = new Date(from);
-          if (isNaN(fromDate.getTime())) {
+          const m = String(from).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+          if (!m) {
             fromDate = undefined;
           } else {
-            // normalize to start of day
-            fromDate.setHours(0, 0, 0, 0);
+            const year = Number(m[1]);
+            const month = Number(m[2]);
+            const day = Number(m[3]);
+            const dt = new Date(Date.UTC(year, month - 1, day));
+            if (isNaN(dt.getTime())) {
+              fromDate = undefined;
+            } else {
+              fromDate = dt; // UTC midnight
+            }
           }
         }
 
         if (to) {
-          toDate = new Date(to);
-          if (isNaN(toDate.getTime())) {
+          const m = String(to).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+          if (!m) {
             toDate = undefined;
           } else {
-            // normalize to end of day
-            toDate.setHours(23, 59, 59, 999);
+            const year = Number(m[1]);
+            const month = Number(m[2]);
+            const day = Number(m[3]);
+            const dt = new Date(Date.UTC(year, month - 1, day));
+            if (isNaN(dt.getTime())) {
+              toDate = undefined;
+            } else {
+              dt.setUTCHours(23, 59, 59, 999);
+              toDate = dt;
+            }
           }
         }
 
@@ -76,11 +95,11 @@ export default class ExpenseService {
     });
   }
 
-  async updateExpense(id, updateData) {
-    return await this.expenseRepository.updateExpense(id, updateData);
+  async updateExpense(expenseId, updateData) {
+    return await this.expenseRepository.updateExpense(expenseId, updateData);
   }
 
-  async deleteExpense(id) {
-    return await this.expenseRepository.deleteExpense(id);
+  async deleteExpense(expenseId) {
+    return await this.expenseRepository.deleteExpense(expenseId);
   }
 }

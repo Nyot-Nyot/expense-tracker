@@ -4,6 +4,7 @@ import AuthMiddleware from "../middlewares/AuthMiddleware.js";
 import {
   createExpenseRules,
   getExpensesRules,
+  updateExpenseRules,
   validate,
 } from "../middlewares/validators.js";
 
@@ -22,6 +23,13 @@ router.get(
   getExpensesRules,
   validate,
   ExpenseController.getExpenses,
+);
+router.put(
+  "/:id",
+  AuthMiddleware.authenticate,
+  updateExpenseRules,
+  validate,
+  ExpenseController.updateExpense,
 );
 
 export default router;

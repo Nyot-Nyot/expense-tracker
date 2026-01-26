@@ -6,6 +6,10 @@ class ExpenseRepository {
     return await expense.save();
   }
 
+  async getExpenseById(id) {
+    return await Expense.findById(id);
+  }
+
   async findAllUserExpenses(criteria, options = {}) {
     const DEFAULT_LIMIT = 50;
     const MAX_LIMIT = 100;
