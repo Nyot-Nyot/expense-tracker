@@ -1,70 +1,53 @@
-import ExpenseService from "../services/ExpenseService.js";
+import { expenseService as ExpenseService } from "../bootstrap.js";
 
 class ExpenseController {
-  async createExpense(req, res) {
+  async createExpense(req, res, next) {
     try {
       const userId = req.user.id;
-
       const { title, amount, category, date, ...rest } = req.body;
-      const errors = [];
-
-      if (!title || typeof title !== "string" || !title.trim()) {
-        errors.push("title is required and must be a non-empty string");
-      }
-
-      const parsedAmount = Number(amount);
-      if (
-        amount === undefined ||
-        Number.isNaN(parsedAmount) ||
-        parsedAmount <= 0
-      ) {
-        errors.push("amount is required and must be a positive number");
-      }
-
-      if (!category || typeof category !== "string" || !category.trim()) {
-        errors.push("category is required and must be a non-empty string");
-      }
-
-      const parsedDate = new Date(date);
-      if (!date || Number.isNaN(parsedDate.getTime())) {
-        errors.push("date is required and must be a valid date");
-      }
-
-      if (errors.length) {
-        return res.status(400).json({ message: "Validation error", errors });
-      }
 
       const expenseData = {
         ...rest,
         title: title.trim(),
-        amount: parsedAmount,
+        amount: Number(amount),
         category: category.trim(),
-        date: parsedDate.toISOString(),
+        date: new Date(date).toISOString(),
         user: userId,
       };
 
       const expense = await ExpenseService.createExpense(expenseData);
-      res.status(201).json(expense);
+      res.status(201).json({ success: true, data: expense });
     } catch (error) {
-      console.error("Error creating expense:", error);
-      res.status(500).json({ message: "Internal server error" });
+      next(error);
     }
   }
 
-  async getExpenses(req, res) {
+  async getExpenses(req, res, next) {
     try {
       const userId = req.user.id;
-      const { filter, from, to } = req.query;
+      const { filter, from, to, page, limit } = req.query;
 
-      const expenses = await ExpenseService.getExpensesByUser(userId, {
+      const result = await ExpenseService.getExpensesByUser(userId, {
         filter,
         from,
         to,
+        page,
+        limit,
       });
-      res.status(200).json(expenses);
+
+      res
+        .status(200)
+        .json({
+          success: true,
+          data: result.items,
+          meta: {
+            total: result.total,
+            page: result.page,
+            pageSize: result.pageSize,
+          },
+        });
     } catch (error) {
-      console.error("Error fetching expenses:", error);
-      res.status(500).json({ message: "Internal server error" });
+      next(error);
     }
   }
 }

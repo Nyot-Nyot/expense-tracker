@@ -1,12 +1,14 @@
-import ExpenseRepository from "../repositories/ExpenseRepository.js";
+export default class ExpenseService {
+  constructor(expenseRepository) {
+    this.expenseRepository = expenseRepository;
+  }
 
-class ExpenseService {
   async createExpense(expenseData) {
-    return await ExpenseRepository.createExpense(expenseData);
+    return await this.expenseRepository.createExpense(expenseData);
   }
 
   async getExpensesByUser(userId, query = {}) {
-    const { filter, from, to } = query;
+    const { filter, from, to, page, limit } = query;
     let dateFilter = {};
 
     const now = new Date();
@@ -68,16 +70,17 @@ class ExpenseService {
     }
 
     const criteria = { user: userId, ...dateFilter };
-    return await ExpenseRepository.findAllUserExpenses(criteria);
+    return await this.expenseRepository.findAllUserExpenses(criteria, {
+      page,
+      limit,
+    });
   }
 
   async updateExpense(id, updateData) {
-    return await ExpenseRepository.updateExpense(id, updateData);
+    return await this.expenseRepository.updateExpense(id, updateData);
   }
 
   async deleteExpense(id) {
-    return await ExpenseRepository.deleteExpense(id);
+    return await this.expenseRepository.deleteExpense(id);
   }
 }
-
-export default new ExpenseService();

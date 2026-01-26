@@ -1,11 +1,12 @@
 import jwt from "jsonwebtoken";
+import { AuthenticationError } from "../errors/index.js";
 import UserRepository from "../repositories/UserRepository.js";
 
 class AuthMiddleware {
   async authenticate(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return next(new AuthenticationError("Unauthorized"));
     }
 
     const token = authHeader.split(" ")[1];
@@ -19,20 +20,20 @@ class AuthMiddleware {
         !Object.prototype.hasOwnProperty.call(decoded, "id") ||
         (typeof decoded.id !== "string" && typeof decoded.id !== "number")
       ) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return next(new AuthenticationError("Unauthorized"));
       }
 
       const userId = decoded.id;
       const user = await UserRepository.findUserById(userId);
       if (!user) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return next(new AuthenticationError("Unauthorized"));
       }
 
       req.user = user; // Attach user to request object
       next();
     } catch (error) {
       console.error("JWT authentication error:", error);
-      return res.status(401).json({ message: "Invalid or expired token" });
+      return next(new AuthenticationError("Invalid or expired token"));
     }
   }
 }

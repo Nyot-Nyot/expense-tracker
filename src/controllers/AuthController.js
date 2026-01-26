@@ -1,66 +1,41 @@
-import AuthService from "../services/AuthService.js";
+import { authService as AuthService } from "../bootstrap.js";
+import { ValidationError } from "../errors/index.js";
 
 class AuthController {
-  async register(req, res) {
+  async register(req, res, next) {
     try {
       const { email, password } = req.body || {};
 
       // Basic input validation and whitelisting
       if (typeof email !== "string" || typeof password !== "string") {
-        return res.status(400).json({
-          message:
-            "Invalid registration data: email and password are required.",
-        });
+        throw new ValidationError(
+          "Invalid registration data: email and password are required.",
+        );
       }
 
       const userData = { email, password };
       const newUser = await AuthService.register(userData);
-      res.status(201).json(newUser);
+      res.status(201).json({ success: true, data: newUser });
     } catch (error) {
-      let statusCode = 500;
-
-      // Conflict: e.g., "Email already in use"
-      if (
-        typeof error.message === "string" &&
-        error.message.toLowerCase().includes("already in use")
-      ) {
-        statusCode = 409;
-      }
-      // Validation errors
-      else if (error.name === "ValidationError") {
-        statusCode = 400;
-      }
-
-      res.status(statusCode).json({ message: error.message });
+      next(error);
     }
   }
 
-  async login(req, res) {
+  async login(req, res, next) {
     try {
       const { email, password } = req.body || {};
 
       // Basic input validation and whitelisting
       if (typeof email !== "string" || typeof password !== "string") {
-        return res.status(400).json({
-          message: "Invalid login data: email and password are required.",
-        });
+        throw new ValidationError(
+          "Invalid login data: email and password are required.",
+        );
       }
 
       const result = await AuthService.login(email, password);
-      res.status(200).json(result);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
-      let statusCode = 500;
-
-      // Unauthorized: e.g., invalid email or password
-      if (
-        error &&
-        (error.code === "AUTH_INVALID_CREDENTIALS" ||
-          error.name === "AuthenticationError")
-      ) {
-        statusCode = 401;
-      }
-
-      res.status(statusCode).json({ message: error.message });
+      next(error);
     }
   }
 }

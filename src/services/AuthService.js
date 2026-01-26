@@ -1,19 +1,23 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import UserRepository from "../repositories/UserRepository.js";
+import { AuthenticationError, ConflictError } from "../errors/index.js";
 
-class AuthService {
+export default class AuthService {
+  constructor(userRepository) {
+    this.userRepository = userRepository;
+  }
+
   async register(userData) {
     const { email, password } = userData;
-    const existingUser = await UserRepository.findUserByEmail(email);
+    const existingUser = await this.userRepository.findUserByEmail(email);
     if (existingUser) {
-      throw new Error("Email already in use");
+      throw new ConflictError("Email already in use");
     }
 
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const newUser = await UserRepository.createUser({
+    const newUser = await this.userRepository.createUser({
       email,
       password: hashedPassword,
     });
@@ -23,14 +27,14 @@ class AuthService {
   }
 
   async login(email, password) {
-    const user = await UserRepository.findUserByEmail(email);
+    const user = await this.userRepository.findUserByEmail(email);
     if (!user) {
-      throw new Error("Invalid email or password");
+      throw new AuthenticationError("Invalid email or password");
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new Error("Invalid email or password");
+      throw new AuthenticationError("Invalid email or password");
     }
 
     // create jwt token
@@ -46,5 +50,3 @@ class AuthService {
     return { ...userWithoutPassword, token };
   }
 }
-
-export default new AuthService();
