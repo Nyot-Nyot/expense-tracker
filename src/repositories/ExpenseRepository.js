@@ -6,16 +6,8 @@ class ExpenseRepository {
     return await expense.save();
   }
 
-  async findAllExpenses() {
-    return await Expense.find();
-  }
-
-  async findExpenseById(id) {
-    return await Expense.findById(id);
-  }
-
-  async findExpensesByUser(userId) {
-    return await Expense.find({ user: userId });
+  async findAllUserExpenses(criteria) {
+    return await Expense.find(criteria).sort({ date: -1 });
   }
 
   async updateExpense(id, updateData) {

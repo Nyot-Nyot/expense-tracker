@@ -13,7 +13,11 @@ class ExpenseController {
       }
 
       const parsedAmount = Number(amount);
-      if (amount === undefined || Number.isNaN(parsedAmount) || parsedAmount <= 0) {
+      if (
+        amount === undefined ||
+        Number.isNaN(parsedAmount) ||
+        parsedAmount <= 0
+      ) {
         errors.push("amount is required and must be a positive number");
       }
 
@@ -43,6 +47,23 @@ class ExpenseController {
       res.status(201).json(expense);
     } catch (error) {
       console.error("Error creating expense:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  async getExpenses(req, res) {
+    try {
+      const userId = req.user.id;
+      const { filter, from, to } = req.query;
+
+      const expenses = await ExpenseService.getExpensesByUser(userId, {
+        filter,
+        from,
+        to,
+      });
+      res.status(200).json(expenses);
+    } catch (error) {
+      console.error("Error fetching expenses:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   }
