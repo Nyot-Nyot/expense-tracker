@@ -31,5 +31,10 @@ router.put(
   validate,
   ExpenseController.updateExpense,
 );
+router.delete(
+  "/:id",
+  AuthMiddleware.authenticate,
+  ExpenseController.deleteExpense,
+);
 
 export default router;

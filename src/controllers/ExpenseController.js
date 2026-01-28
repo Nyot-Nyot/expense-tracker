@@ -92,6 +92,30 @@ class ExpenseController {
       next(error);
     }
   }
+
+  async deleteExpense(req, res, next) {
+    try {
+      const expenseId = req.params.id;
+
+      const expense = await ExpenseService.getExpenseById(expenseId);
+
+      if (!expense) {
+        throw new NotFoundError("Expense not found");
+      }
+
+      if (expense.user.toString() !== req.user.id) {
+        throw new ForbiddenError(
+          "You do not have permission to delete this expense",
+        );
+      }
+
+      await ExpenseService.deleteExpense(expenseId);
+
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new ExpenseController();
